@@ -792,9 +792,9 @@ void Debugger::mainLoop(Client *client) {
 			ExceptionState *state = exceptions.find(thread);
 			if (state) {
 				uint32_t sp = state->context.gpr[1];
-				uint32_t trace[32];
+				uint32_t trace[100];
 				int index = 0;
-				while (checkDataRead(sp, 4)) {
+				while (checkDataRead(sp, 4) && index < 100) {
 					sp = *(uint32_t *)sp;
 					if (!checkDataRead(sp, 4)) break;
 						
