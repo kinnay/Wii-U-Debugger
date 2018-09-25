@@ -1,5 +1,12 @@
 # Wii-U-Debugger
-Wii U debugger with breakpoints and more
+This is a rewrite of [DiiBugger](https://github.com/Kinnay/DiiBugger) for the homebrew launcher.
+
+In addition to homebrew launcer compatibility, it has received various improvements, most notably:
+* Better breakpoint support. The old debugger assumed only one thread was active at once. It wouldn't work correctly or crash when two threads hit a breakpoint at the same time. The new implementation allows multiple threads to be paused at the same time and lets you step through them independently.
+* A tab to display the loaded modules
+* A bunch of bug fixes and improved reliability
+
+File replacement support has been removed for now, because it could be unstable sometimes.
 
 # Screenshots
 <div style="float: left">
