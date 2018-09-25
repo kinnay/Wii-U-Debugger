@@ -141,7 +141,6 @@ class Debugger:
 		self.s.settimeout(4)
 		self.s.connect((host, 1560))
 		self.connected = True
-		self.closeRequest = False
 		events.Connected.emit()
 		
 	def handleClose(self):
@@ -272,12 +271,16 @@ class Debugger:
 		self.sendall(bytes([byte]))
 
 	def sendall(self, data):
-		try:
-			self.s.sendall(data)
-		except socket.error:
-			self.handleClose()
+		if self.connected:
+			try:
+				self.s.sendall(data)
+			except socket.error:
+				self.handleClose()
 
 	def recvall(self, num):
+		if not self.connected:
+			return bytes(num)
+	
 		try:
 			data = b""
 			while len(data) < num:

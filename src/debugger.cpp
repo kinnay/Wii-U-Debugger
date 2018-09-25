@@ -306,7 +306,9 @@ void ExceptionMgr::cleanup() {
 	
 	for (int i = 0; i < list.size(); i++) {
 		ExceptionState *state = list[i];
-		OSSendMessage(&state->queue, &message, OS_MESSAGE_FLAGS_BLOCKING);
+		if (state->isPaused) {
+			OSSendMessage(&state->queue, &message, OS_MESSAGE_FLAGS_NONE);
+		}
 	}
 	
 	unlock();
@@ -331,6 +333,7 @@ ExceptionState *ExceptionMgr::findOrCreate(OSThread *thread) {
 	if (!state) {
 		state = new ExceptionState();
 		state->thread = thread;
+		state->isPaused = false;
 		OSInitMessageQueue(&state->queue, &state->message, 1);
 		list.push_back(state);
 	}
@@ -512,7 +515,9 @@ Debugger::StepCommand Debugger::notifyBreak(ExceptionState *state) {
 	message.args[2] = (uint32_t)state->thread;
 	OSSendMessage(&eventQueue, &message, OS_MESSAGE_FLAGS_BLOCKING);
 	
+	state->isPaused = true;
 	OSReceiveMessage(&state->queue, &message, OS_MESSAGE_FLAGS_BLOCKING);
+	state->isPaused = false;
 	return (StepCommand)message.message;
 }
 

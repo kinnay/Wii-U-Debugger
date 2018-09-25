@@ -48,6 +48,8 @@ public:
 	
 	OSMessageQueue queue;
 	OSMessage message;
+	
+	bool isPaused;
 };
 
 
