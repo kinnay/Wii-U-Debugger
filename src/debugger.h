@@ -235,7 +235,8 @@ private:
 	void threadFunc();
 	void mainLoop(Client *client);
 	void handleException(OSContext *context, ExceptionState::Type type);
-	void handleFatalCrash(ExceptionState *state);
+	void handleFatalCrash(OSContext *context, ExceptionState::Type type);
+	void handleCrash(ExceptionState *state);
 	void handleBreakPoint(ExceptionState *state);
 	void processBreakPoint(ExceptionState *state);
 	void resumeBreakPoint(ExceptionState *state);
@@ -246,6 +247,8 @@ private:
 	
 	OSMessageQueue eventQueue;
 	OSMessage eventMessages[MESSAGE_COUNT];
+	
+	OSThread *serverThread;
 	
 	BreakPointMgr breakpoints;
 	ExceptionMgr exceptions;

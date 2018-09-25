@@ -560,7 +560,7 @@ void Debugger::handleBreakPoint(ExceptionState *state) {
 	stepper.handleBreakPoint(state);
 	
 	if (!connected) {
-		handleFatalCrash(state);
+		handleFatalCrash(&state->context, state->type);
 	}
 	
 	uint32_t addr = state->context.srr0;
@@ -578,7 +578,7 @@ void Debugger::handleBreakPoint(ExceptionState *state) {
 	resumeBreakPoint(state);
 }
 
-void Debugger::handleFatalCrash(ExceptionState *state) {
+void Debugger::handleCrash(ExceptionState *state) {
 	stepper.adjustAddress(state);
 	if (connected) {
 		OSMessage message;
@@ -593,18 +593,26 @@ void Debugger::handleFatalCrash(ExceptionState *state) {
 		}
 	}
 	else {
-		const char *type;
-		if (state->type == ExceptionState::DSI) type = "A DSI";
-		else if (state->type == ExceptionState::ISI) type = "An ISI";
-		else {
-			type = "A program";
-		}
-		DumpContext(&state->context, type);
+		handleFatalCrash(&state->context, state->type);
 	}
+}
+
+void Debugger::handleFatalCrash(OSContext *context, ExceptionState::Type type) {
+	const char *name;
+	if (type == ExceptionState::DSI) name = "A DSI";
+	else if (type == ExceptionState::ISI) name = "An ISI";
+	else {
+		name = "A program";
+	}
+	DumpContext(context, name);
 }
 
 void Debugger::handleException(OSContext *context, ExceptionState::Type type) {
 	OSThread *thread = OSGetCurrentThread();
+	
+	if (thread == serverThread) {
+		handleFatalCrash(context, type);
+	}
 	
 	ExceptionState *state = exceptions.findOrCreate(thread);
 	memcpy(&state->context, context, sizeof(OSContext));
@@ -616,7 +624,7 @@ void Debugger::handleException(OSContext *context, ExceptionState::Type type) {
 		handleBreakPoint(state);
 	}
 	else {
-		handleFatalCrash(state);
+		handleCrash(state);
 	}
 }
 
@@ -913,16 +921,16 @@ void Debugger::start() {
 	exceptions.init();
 	stepper.init();
 	
-	OSThread *thread = new OSThread();
+	serverThread = new OSThread();	
 	char *stack = new char[0x8000];
 
 	OSCreateThread(
-		thread, threadEntry, 0, 0,
+		serverThread, threadEntry, 0, 0,
 		stack + STACK_SIZE, STACK_SIZE,
 		0, 12
 	);
-	OSSetThreadName(thread, "Debug Server");
-	OSResumeThread(thread);
+	OSSetThreadName(serverThread, "Debug Server");
+	OSResumeThread(serverThread);
 	
 	while (!initialized) {
 		OSSleepTicks(OSMillisecondsToTicks(20));
