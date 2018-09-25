@@ -46,7 +46,7 @@ def extend_sign(value, bits=16):
 
 def ihex(value):
 	sign = "-" if value < 0 else ""
-	return "%s0x%X" %(sign, value)
+	return "%s0x%X" %(sign, abs(value))
 	
 	
 condition_table_true = ["lt", "gt", "eq"]
@@ -231,7 +231,7 @@ def decode_compare_float(instr):
 def decode_memory(instr):
 	def decode(value, addr):
 		D, A, d = decodeD(value)
-		A = extend_sign(A)
+		d = extend_sign(d)
 		return instr, "r%i, %s(r%i)" %(D, ihex(d), A)
 	return decode
 	
