@@ -248,7 +248,7 @@ def decode_memory_indexed(instr):
 def decode_memory_float(instr):
 	def decode(value, addr):
 		D, A, d = decodeD(value)
-		A = extend_sign(A)
+		d = extend_sign(d)
 		return instr, "f%i, %s(r%i)" %(D, ihex(d), A)
 	return decode
 	
