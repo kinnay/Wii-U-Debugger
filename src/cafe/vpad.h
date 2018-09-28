@@ -63,7 +63,7 @@ struct VPADStatus {
 	uint32_t released;
 	VPADVec2D leftStick;
 	VPADVec2D rightStick;
-	VPADAccStatus accelorometer;
+	VPADAccStatus accelerometer;
 	VPADVec3D gyro;
 	VPADVec3D angle;
 	uint8_t error;
